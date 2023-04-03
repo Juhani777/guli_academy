@@ -5,9 +5,13 @@ spring:
 #  服务名
   application:
     name: service-edu
-#    环境设置
+# 环境设置
   profiles:
     active: dev
+# 返回json的全局时间格式
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT-8
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
