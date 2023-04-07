@@ -3,9 +3,13 @@ package com.Juhani.eduService.controller;
 
 import com.Juhani.commonutils.R;
 import com.Juhani.eduService.entity.EduTeacher;
+import com.Juhani.eduService.entity.vo.TeacherQuery;
 import com.Juhani.eduService.service.EduTeacherService;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.apache.poi.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -55,6 +59,42 @@ public class EduTeacherController {
          List<EduTeacher> records = pageTeacher.getRecords();
         return R.ok().data("total",total).data("rows",records);
 
+    }
+
+
+    //条件查询带分页
+    @PostMapping("/pageTeacherCondition/{current}/{limit}")
+    public R pageTeacherCondition(@PathVariable long current,
+                                  @PathVariable long limit,
+                                  @RequestBody(required = false) TeacherQuery teacherQuery){
+        Page<EduTeacher> pageTeacher = new Page<>(current,limit);
+
+        //构造条件
+        QueryWrapper<EduTeacher> wrapper = new QueryWrapper<>();
+        //多条件组合查询
+        //mybatis 动态sql
+        String name = teacherQuery.getName();
+        Integer level = teacherQuery.getLevel();
+        String begin = teacherQuery.getBegin();
+        String end = teacherQuery.getEnd();
+        //判断条件值是否为空，如果不为空，拼接条件
+        if(!StringUtils.isEmpty(name)){
+            wrapper.like("name",name);
+        }
+        if(!StringUtils.isEmpty(level)){
+            wrapper.eq("level",level);
+        }
+        if(!StringUtils.isEmpty(begin)){
+            wrapper.ge("gmt_create",begin); //column放表中的字段
+        }
+        if(!StringUtils.isEmpty(end)){
+            wrapper.le("gmt_create",end);
+        }
+
+        teacherService.page(pageTeacher,wrapper);
+        long total = pageTeacher.getTotal();
+        List<EduTeacher> records = pageTeacher.getRecords();
+        return R.ok().data("total",total).data("rows",records);
     }
 
 }
